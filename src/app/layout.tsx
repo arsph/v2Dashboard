@@ -19,8 +19,8 @@ const geistMono = Geist_Mono({
 });
 
 export const metadata: Metadata = {
-  title: 'v2Dashboard',
-  description: 'Dashboard for VPN Sales Metrics',
+  title: 'V2 Dashboard',
+  description: 'A modern dashboard for managing sales and expenses',
   icons: {
     icon: '/img/logo.png',
     shortcut: '/img/logo.png',
@@ -28,11 +28,24 @@ export const metadata: Metadata = {
   },
 };
 
-export default function RootLayout({
+async function initDatabase() {
+  try {
+    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/init-db`);
+    if (!response.ok) {
+      throw new Error('Failed to initialize database');
+    }
+  } catch (error) {
+    console.error('Error initializing database:', error);
+  }
+}
+
+export default async function RootLayout({
   children,
 }: Readonly<{
   children: React.ReactNode;
 }>) {
+  await initDatabase();
+
   return (
     <html lang="en" className="dark">
       <body className={`${geistSans.variable} ${geistMono.variable} antialiased`}>

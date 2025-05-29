@@ -2,8 +2,7 @@
 
 import * as React from 'react';
 import type { Transaction, SaleFormData, Expense, ExpenseFormData } from '@/lib/types';
-import { mockDashboardData } from '@/lib/data';
-import { getSales, getExpenses, addSale, addExpense, removeSale, removeExpense } from '@/lib/storageService';
+import { getSales, getExpenses, addSale, addExpense, removeSale, removeExpense } from '@/lib/db';
 
 interface TransactionsContextType {
   transactions: Transaction[];
@@ -12,6 +11,7 @@ interface TransactionsContextType {
   addExpenseTransaction: (expenseData: ExpenseFormData) => Promise<void>;
   removeSaleTransaction: (id: string) => Promise<void>;
   removeExpenseTransaction: (id: string) => Promise<void>;
+  refreshData: () => Promise<void>;
 }
 
 const TransactionsContext = React.createContext<TransactionsContextType | undefined>(undefined);
@@ -20,11 +20,23 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
   const [transactions, setTransactions] = React.useState<Transaction[]>([]);
   const [expenses, setExpenses] = React.useState<Expense[]>([]);
 
-  // Load data from localStorage on mount
-  React.useEffect(() => {
-    setTransactions(getSales());
-    setExpenses(getExpenses());
+  const refreshData = React.useCallback(async () => {
+    try {
+      const [salesData, expensesData] = await Promise.all([
+        getSales(),
+        getExpenses()
+      ]);
+      setTransactions(salesData);
+      setExpenses(expensesData);
+    } catch (error) {
+      console.error('Error refreshing data:', error);
+    }
   }, []);
+
+  // Load data from database on mount
+  React.useEffect(() => {
+    refreshData();
+  }, [refreshData]);
 
   const addSaleTransaction = async (saleData: SaleFormData) => {
     const newTransaction: Transaction = {
@@ -35,8 +47,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       durationMonths: saleData.durationMonths,
       price: Math.round(saleData.price), // Rounded price
     };
-    addSale(newTransaction);
-    setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
+    await addSale(newTransaction);
+    await refreshData();
   };
 
   const addExpenseTransaction = async (expenseData: ExpenseFormData) => {
@@ -46,18 +58,18 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       date: expenseData.date.toISOString(),
       price: Math.round(expenseData.price), // Rounded price
     };
-    addExpense(newExpense);
-    setExpenses(prevExpenses => [newExpense, ...prevExpenses]);
+    await addExpense(newExpense);
+    await refreshData();
   };
 
   const removeSaleTransaction = async (id: string) => {
-    removeSale(id);
-    setTransactions(prevTransactions => prevTransactions.filter(t => t.id !== id));
+    await removeSale(id);
+    await refreshData();
   };
 
   const removeExpenseTransaction = async (id: string) => {
-    removeExpense(id);
-    setExpenses(prevExpenses => prevExpenses.filter(e => e.id !== id));
+    await removeExpense(id);
+    await refreshData();
   };
 
   return (
@@ -67,7 +79,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       addSaleTransaction, 
       addExpenseTransaction,
       removeSaleTransaction,
-      removeExpenseTransaction 
+      removeExpenseTransaction,
+      refreshData
     }}>
       {children}
     </TransactionsContext.Provider>
