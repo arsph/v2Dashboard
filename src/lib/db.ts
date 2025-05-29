@@ -75,7 +75,7 @@ export async function getSales(): Promise<Transaction[]> {
 export async function addSale(sale: Transaction): Promise<void> {
   try {
     console.log('Adding sale:', sale);
-    const { id, user: customerName, date, trafficAmount, durationMonths, price } = sale;
+    const { id, customer_name, date, trafficAmount, durationMonths, price } = sale;
     await sql`
       INSERT INTO sales (
         id,
@@ -86,7 +86,7 @@ export async function addSale(sale: Transaction): Promise<void> {
         price
       ) VALUES (
         ${id},
-        ${customerName},
+        ${customer_name},
         ${date},
         ${trafficAmount},
         ${durationMonths},
