@@ -5,13 +5,20 @@ import type { Transaction, Expense } from './types';
 export async function initDatabase() {
   try {
     console.log('Starting database initialization...');
+    console.log('Checking database connection...');
+    
+    // Test the connection
+    await sql`SELECT 1`;
+    console.log('Database connection successful');
 
     // Drop existing tables if they exist
+    console.log('Dropping existing tables...');
     await sql`DROP TABLE IF EXISTS sales;`;
     await sql`DROP TABLE IF EXISTS expenses;`;
     console.log('Dropped existing tables');
 
     // Create sales table
+    console.log('Creating sales table...');
     await sql`
       CREATE TABLE sales (
         id VARCHAR(255) PRIMARY KEY,
@@ -26,6 +33,7 @@ export async function initDatabase() {
     console.log('Created sales table');
 
     // Create expenses table
+    console.log('Creating expenses table...');
     await sql`
       CREATE TABLE expenses (
         id VARCHAR(255) PRIMARY KEY,
@@ -40,6 +48,13 @@ export async function initDatabase() {
     console.log('Database initialization completed successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
+    if (error instanceof Error) {
+      console.error('Error details:', {
+        name: error.name,
+        message: error.message,
+        stack: error.stack
+      });
+    }
     throw error;
   }
 }
