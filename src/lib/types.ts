@@ -1,4 +1,3 @@
-
 export interface SalesMetric {
   title: string;
   value: string;
@@ -31,7 +30,7 @@ export interface SalesBreakdownData {
 
 export interface Transaction {
   id: string;
-  user: string;
+  customer_name: string;
   date: string; // ISO date string
   trafficAmount: string; // e.g., "Unlimited", "500 GB"
   durationMonths: number;
@@ -57,7 +56,7 @@ export interface DashboardData {
 import { z } from 'zod';
 
 export const SaleFormSchema = z.object({
-  name: z.string().min(1, "Name is required"),
+  customer_name: z.string().min(1, "Customer name is required"),
   date: z.date({ required_error: "Date is required" }),
   trafficAmount: z.string().min(1, "Traffic amount is required"),
   durationMonths: z.coerce.number().min(1, "Duration must be at least 1 month"),

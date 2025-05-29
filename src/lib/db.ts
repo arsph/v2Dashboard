@@ -60,7 +60,7 @@ export async function getSales(): Promise<Transaction[]> {
     `;
     return rows.map(row => ({
       id: row.id,
-      user: row.customer_name,
+      customer_name: row.customer_name,
       date: row.date,
       trafficAmount: row.traffic_amount,
       durationMonths: row.duration_months,
