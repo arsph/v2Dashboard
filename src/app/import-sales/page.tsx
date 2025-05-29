@@ -25,7 +25,7 @@ export default function ImportSalesPage() {
   const form = useForm<SaleFormData>({
     resolver: zodResolver(SaleFormSchema),
     defaultValues: {
-      name: '',
+      customer_name: '',
       trafficAmount: '',
       durationMonths: 1,
       price: undefined, 
@@ -38,7 +38,7 @@ export default function ImportSalesPage() {
       await addSaleTransaction(data);
       toast({
         title: 'Sale Added Successfully!',
-        description: `Sale for ${data.name} has been recorded.`,
+        description: `Sale for ${data.customer_name} has been recorded.`,
       });
       form.reset();
     } catch (error) {
@@ -73,7 +73,7 @@ export default function ImportSalesPage() {
               <div className="grid gap-4">
                 <FormField
                   control={form.control}
-                  name="name"
+                  name="customer_name"
                   render={({ field }) => (
                     <FormItem>
                       <FormLabel>Customer Name</FormLabel>

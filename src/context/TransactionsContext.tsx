@@ -40,8 +40,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
 
   const addSaleTransaction = async (saleData: SaleFormData) => {
     const newTransaction: Transaction = {
-      id: `txn_${saleData.name}_${saleData.date.getTime()}`,
-      user: saleData.name,
+      id: `txn_${saleData.customer_name}_${saleData.date.getTime()}`,
+      customer_name: saleData.customer_name,
       date: saleData.date.toISOString(),
       trafficAmount: saleData.trafficAmount,
       durationMonths: saleData.durationMonths,
