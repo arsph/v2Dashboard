@@ -4,9 +4,16 @@ import type { Transaction, Expense } from './types';
 // Initialize database tables
 export async function initDatabase() {
   try {
+    console.log('Starting database initialization...');
+
+    // Drop existing tables if they exist
+    await sql`DROP TABLE IF EXISTS sales;`;
+    await sql`DROP TABLE IF EXISTS expenses;`;
+    console.log('Dropped existing tables');
+
     // Create sales table
     await sql`
-      CREATE TABLE IF NOT EXISTS sales (
+      CREATE TABLE sales (
         id VARCHAR(255) PRIMARY KEY,
         user VARCHAR(255) NOT NULL,
         date TIMESTAMP NOT NULL,
@@ -16,10 +23,11 @@ export async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
+    console.log('Created sales table');
 
     // Create expenses table
     await sql`
-      CREATE TABLE IF NOT EXISTS expenses (
+      CREATE TABLE expenses (
         id VARCHAR(255) PRIMARY KEY,
         server VARCHAR(255) NOT NULL,
         date TIMESTAMP NOT NULL,
@@ -27,6 +35,9 @@ export async function initDatabase() {
         created_at TIMESTAMP DEFAULT CURRENT_TIMESTAMP
       );
     `;
+    console.log('Created expenses table');
+
+    console.log('Database initialization completed successfully');
   } catch (error) {
     console.error('Error initializing database:', error);
     throw error;
@@ -56,6 +67,7 @@ export async function getSales(): Promise<Transaction[]> {
 
 export async function addSale(sale: Transaction): Promise<void> {
   try {
+    console.log('Adding sale:', sale);
     await sql`
       INSERT INTO sales (id, user, date, traffic_amount, duration_months, price)
       VALUES (
@@ -67,6 +79,7 @@ export async function addSale(sale: Transaction): Promise<void> {
         ${sale.price}
       );
     `;
+    console.log('Sale added successfully');
   } catch (error) {
     console.error('Error adding sale:', error);
     throw error;
@@ -106,6 +119,7 @@ export async function getExpenses(): Promise<Expense[]> {
 
 export async function addExpense(expense: Expense): Promise<void> {
   try {
+    console.log('Adding expense:', expense);
     await sql`
       INSERT INTO expenses (id, server, date, price)
       VALUES (
@@ -115,6 +129,7 @@ export async function addExpense(expense: Expense): Promise<void> {
         ${expense.price}
       );
     `;
+    console.log('Expense added successfully');
   } catch (error) {
     console.error('Error adding expense:', error);
     throw error;

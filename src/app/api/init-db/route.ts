@@ -3,12 +3,21 @@ import { initDatabase } from '@/lib/db';
 
 export async function GET() {
   try {
+    console.log('API: Starting database initialization...');
     await initDatabase();
-    return NextResponse.json({ message: 'Database initialized successfully' });
+    console.log('API: Database initialization completed successfully');
+    return NextResponse.json({ 
+      success: true,
+      message: 'Database initialized successfully' 
+    });
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('API: Error initializing database:', error);
     return NextResponse.json(
-      { error: 'Failed to initialize database' },
+      { 
+        success: false,
+        error: 'Failed to initialize database',
+        details: error instanceof Error ? error.message : 'Unknown error'
+      },
       { status: 500 }
     );
   }

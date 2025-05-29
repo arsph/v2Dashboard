@@ -6,7 +6,7 @@ import { TransactionsProvider } from '@/context/TransactionsContext';
 import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AuthProvider } from '@/context/AuthContext';
-import ProtectedLayout from '@/components/layout/ProtectedLayout'; // We will create this
+import ProtectedLayout from '@/components/layout/ProtectedLayout';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -30,12 +30,25 @@ export const metadata: Metadata = {
 
 async function initDatabase() {
   try {
-    const response = await fetch(`${process.env.NEXT_PUBLIC_APP_URL}/api/init-db`);
+    console.log('Layout: Attempting to initialize database...');
+    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
+    const response = await fetch(`${baseUrl}/api/init-db`, {
+      cache: 'no-store',
+      headers: {
+        'Cache-Control': 'no-cache',
+      },
+    });
+    
     if (!response.ok) {
-      throw new Error('Failed to initialize database');
+      const errorData = await response.json();
+      console.error('Layout: Database initialization failed:', errorData);
+      throw new Error(errorData.details || 'Failed to initialize database');
     }
+    
+    const data = await response.json();
+    console.log('Layout: Database initialization response:', data);
   } catch (error) {
-    console.error('Error initializing database:', error);
+    console.error('Layout: Error during database initialization:', error);
   }
 }
 
