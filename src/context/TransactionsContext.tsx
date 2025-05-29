@@ -3,7 +3,7 @@
 import * as React from 'react';
 import type { Transaction, SaleFormData, Expense, ExpenseFormData } from '@/lib/types';
 import { mockDashboardData } from '@/lib/data';
-import { addSaleToFirestore, addExpenseToFirestore, deleteSaleFromFirestore, deleteExpenseFromFirestore } from '@/lib/firebaseService'; // Added delete functions
+import { getSales, getExpenses, addSale, addExpense, removeSale, removeExpense } from '@/lib/storageService';
 
 interface TransactionsContextType {
   transactions: Transaction[];
@@ -17,8 +17,14 @@ interface TransactionsContextType {
 const TransactionsContext = React.createContext<TransactionsContextType | undefined>(undefined);
 
 export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [transactions, setTransactions] = React.useState<Transaction[]>(mockDashboardData.recentTransactions);
-  const [expenses, setExpenses] = React.useState<Expense[]>(mockDashboardData.expenses);
+  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
+  const [expenses, setExpenses] = React.useState<Expense[]>([]);
+
+  // Load data from localStorage on mount
+  React.useEffect(() => {
+    setTransactions(getSales());
+    setExpenses(getExpenses());
+  }, []);
 
   const addSaleTransaction = async (saleData: SaleFormData) => {
     const newTransaction: Transaction = {
@@ -29,8 +35,8 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       durationMonths: saleData.durationMonths,
       price: Math.round(saleData.price), // Rounded price
     };
+    addSale(newTransaction);
     setTransactions(prevTransactions => [newTransaction, ...prevTransactions]);
-    await addSaleToFirestore(newTransaction);
   };
 
   const addExpenseTransaction = async (expenseData: ExpenseFormData) => {
@@ -40,18 +46,18 @@ export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ 
       date: expenseData.date.toISOString(),
       price: Math.round(expenseData.price), // Rounded price
     };
+    addExpense(newExpense);
     setExpenses(prevExpenses => [newExpense, ...prevExpenses]);
-    await addExpenseToFirestore(newExpense);
   };
 
   const removeSaleTransaction = async (id: string) => {
+    removeSale(id);
     setTransactions(prevTransactions => prevTransactions.filter(t => t.id !== id));
-    await deleteSaleFromFirestore(id);
   };
 
   const removeExpenseTransaction = async (id: string) => {
+    removeExpense(id);
     setExpenses(prevExpenses => prevExpenses.filter(e => e.id !== id));
-    await deleteExpenseFromFirestore(id);
   };
 
   return (

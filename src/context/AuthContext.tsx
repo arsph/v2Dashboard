@@ -1,4 +1,3 @@
-
 'use client';
 
 import * as React from 'react';
@@ -31,7 +30,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         setIsAuthenticated(true);
       }
     } catch (error) {
-        console.error("Could not access localStorage:", error);
+      console.error("Could not access localStorage:", error);
     }
     setIsLoading(false);
   }, []);
