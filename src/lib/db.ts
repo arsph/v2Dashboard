@@ -15,7 +15,7 @@ export async function initDatabase() {
     await sql`
       CREATE TABLE sales (
         id VARCHAR(255) PRIMARY KEY,
-        user VARCHAR(255) NOT NULL,
+        customer_name VARCHAR(255) NOT NULL,
         date TIMESTAMP NOT NULL,
         traffic_amount VARCHAR(255) NOT NULL,
         duration_months INTEGER NOT NULL,
@@ -53,7 +53,7 @@ export async function getSales(): Promise<Transaction[]> {
     `;
     return rows.map(row => ({
       id: row.id,
-      user: row.user,
+      user: row.customer_name,
       date: row.date,
       trafficAmount: row.traffic_amount,
       durationMonths: row.duration_months,
@@ -69,7 +69,7 @@ export async function addSale(sale: Transaction): Promise<void> {
   try {
     console.log('Adding sale:', sale);
     await sql`
-      INSERT INTO sales (id, user, date, traffic_amount, duration_months, price)
+      INSERT INTO sales (id, customer_name, date, traffic_amount, duration_months, price)
       VALUES (
         ${sale.id},
         ${sale.user},
