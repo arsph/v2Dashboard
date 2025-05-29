@@ -48,7 +48,14 @@ export async function initDatabase() {
 export async function getSales(): Promise<Transaction[]> {
   try {
     const { rows } = await sql`
-      SELECT * FROM sales 
+      SELECT 
+        id,
+        customer_name,
+        date,
+        traffic_amount,
+        duration_months,
+        price
+      FROM sales 
       ORDER BY date DESC;
     `;
     return rows.map(row => ({
@@ -68,15 +75,22 @@ export async function getSales(): Promise<Transaction[]> {
 export async function addSale(sale: Transaction): Promise<void> {
   try {
     console.log('Adding sale:', sale);
+    const { id, user, date, trafficAmount, durationMonths, price } = sale;
     await sql`
-      INSERT INTO sales (id, customer_name, date, traffic_amount, duration_months, price)
-      VALUES (
-        ${sale.id},
-        ${sale.user},
-        ${sale.date},
-        ${sale.trafficAmount},
-        ${sale.durationMonths},
-        ${sale.price}
+      INSERT INTO sales (
+        id,
+        customer_name,
+        date,
+        traffic_amount,
+        duration_months,
+        price
+      ) VALUES (
+        ${id},
+        ${user},
+        ${date},
+        ${trafficAmount},
+        ${durationMonths},
+        ${price}
       );
     `;
     console.log('Sale added successfully');
@@ -102,7 +116,12 @@ export async function removeSale(id: string): Promise<void> {
 export async function getExpenses(): Promise<Expense[]> {
   try {
     const { rows } = await sql`
-      SELECT * FROM expenses 
+      SELECT 
+        id,
+        server,
+        date,
+        price
+      FROM expenses 
       ORDER BY date DESC;
     `;
     return rows.map(row => ({
@@ -120,13 +139,18 @@ export async function getExpenses(): Promise<Expense[]> {
 export async function addExpense(expense: Expense): Promise<void> {
   try {
     console.log('Adding expense:', expense);
+    const { id, server, date, price } = expense;
     await sql`
-      INSERT INTO expenses (id, server, date, price)
-      VALUES (
-        ${expense.id},
-        ${expense.server},
-        ${expense.date},
-        ${expense.price}
+      INSERT INTO expenses (
+        id,
+        server,
+        date,
+        price
+      ) VALUES (
+        ${id},
+        ${server},
+        ${date},
+        ${price}
       );
     `;
     console.log('Expense added successfully');
