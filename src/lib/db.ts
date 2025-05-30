@@ -1,12 +1,12 @@
 import { Pool } from 'pg';
 import type { Transaction, Expense } from './types';
 
-// Create a new pool using the DATABASE_URL from Railway
+// Create a new pool using the DATABASE_URL from Render
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
-  ssl: {
+  ssl: process.env.NODE_ENV === 'production' ? {
     rejectUnauthorized: false
-  }
+  } : undefined
 });
 
 // Test database connection
