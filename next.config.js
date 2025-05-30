@@ -1,5 +1,6 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
+  output: 'standalone',
   webpack: (config, { isServer }) => {
     // Optimize bundle size
     config.optimization = {
@@ -46,6 +47,12 @@ const nextConfig = {
   // Disable static optimization for dynamic routes
   experimental: {
     serverActions: true,
+  },
+  // Configure build output
+  distDir: '.next',
+  // Configure image optimization
+  images: {
+    unoptimized: true,
   },
 };
 
