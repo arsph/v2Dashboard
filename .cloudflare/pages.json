@@ -4,5 +4,8 @@
   "installCommand": "npm install",
   "framework": "nextjs",
   "buildOutputDirectory": ".next",
-  "nodeVersion": "20.11.1"
+  "nodeVersion": "20.11.1",
+  "env": {
+    "NODE_VERSION": "20.11.1"
+  }
 } 

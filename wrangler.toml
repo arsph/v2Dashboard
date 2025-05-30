@@ -5,4 +5,4 @@ pages_build_output_dir = ".next"
 [[d1_databases]]
 binding = "DB"
 database_name = "v2dashboard-db"
-database_id = "your-database-id-here" 
+database_id = "beea7aa3-d25d-4924-8afd-dc4d1e60d484" 
