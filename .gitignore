@@ -35,6 +35,14 @@ yarn-error.log*
 *.tsbuildinfo
 next-env.d.ts
 
+# IDE
+.vscode/
+.idea/
+
+# Cloudflare
+.wrangler/
+.cloudflare/
+
 .genkit/*
 .env*
 
