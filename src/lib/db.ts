@@ -1,169 +1,107 @@
+import { Pool } from 'pg';
 import type { Transaction, Expense } from './types';
 
-declare global {
-  const DB: D1Database;
+// Create a new pool using the DATABASE_URL from Railway
+const pool = new Pool({
+  connectionString: process.env.DATABASE_URL,
+  ssl: {
+    rejectUnauthorized: false
+  }
+});
+
+// Test database connection
+export async function testConnection() {
+  try {
+    const client = await pool.connect();
+    console.log('Database connection successful');
+    client.release();
+    return true;
+  } catch (error) {
+    console.error('Database connection error:', error);
+    return false;
+  }
 }
 
 // Initialize database tables
 export async function initDatabase() {
   try {
-    console.log('Starting database initialization...');
-    console.log('Checking database connection...');
+    const client = await pool.connect();
     
-    // Test the connection
-    await DB.prepare('SELECT 1').run();
-    console.log('Database connection successful');
-
     // Create sales table
-    console.log('Creating sales table...');
-    await DB.prepare(`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS sales (
-        id TEXT PRIMARY KEY,
-        customer_name TEXT NOT NULL,
-        date TEXT NOT NULL,
-        traffic_amount TEXT NOT NULL,
+        id SERIAL PRIMARY KEY,
+        customer_name VARCHAR(255) NOT NULL,
+        date DATE NOT NULL,
+        traffic_amount INTEGER NOT NULL,
         duration_months INTEGER NOT NULL,
-        price INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        price DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
-    `).run();
-    console.log('Created sales table');
+    `);
 
     // Create expenses table
-    console.log('Creating expenses table...');
-    await DB.prepare(`
+    await client.query(`
       CREATE TABLE IF NOT EXISTS expenses (
-        id TEXT PRIMARY KEY,
-        server TEXT NOT NULL,
-        date TEXT NOT NULL,
-        price INTEGER NOT NULL,
-        created_at TEXT DEFAULT CURRENT_TIMESTAMP
+        id SERIAL PRIMARY KEY,
+        server VARCHAR(255) NOT NULL,
+        date DATE NOT NULL,
+        price DECIMAL(10,2) NOT NULL,
+        created_at TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP
       );
-    `).run();
-    console.log('Created expenses table');
+    `);
 
-    console.log('Database initialization completed successfully');
+    client.release();
+    console.log('Database tables initialized successfully');
+    return true;
   } catch (error) {
     console.error('Error initializing database:', error);
-    if (error instanceof Error) {
-      console.error('Error details:', {
-        name: error.name,
-        message: error.message,
-        stack: error.stack
-      });
-    }
-    throw error;
+    return false;
   }
 }
 
 // Sales operations
-export async function getSales(): Promise<Transaction[]> {
-  try {
-    const { results } = await DB.prepare(`
-      SELECT 
-        id,
-        customer_name,
-        date,
-        traffic_amount,
-        duration_months,
-        price
-      FROM sales 
-      ORDER BY date DESC;
-    `).all();
-    
-    return results.map((row: any) => ({
-      id: row.id,
-      customer_name: row.customer_name,
-      date: row.date,
-      trafficAmount: row.traffic_amount,
-      durationMonths: row.duration_months,
-      price: row.price
-    }));
-  } catch (error) {
-    console.error('Error fetching sales:', error);
-    throw error;
-  }
+export async function getSales() {
+  const result = await pool.query('SELECT * FROM sales ORDER BY date DESC');
+  return result.rows;
 }
 
-export async function addSale(sale: Transaction): Promise<void> {
-  try {
-    console.log('Adding sale:', sale);
-    const { id, customer_name, date, trafficAmount, durationMonths, price } = sale;
-    await DB.prepare(`
-      INSERT INTO sales (
-        id,
-        customer_name,
-        date,
-        traffic_amount,
-        duration_months,
-        price
-      ) VALUES (?, ?, ?, ?, ?, ?);
-    `).bind(id, customer_name, date, trafficAmount, durationMonths, price).run();
-    console.log('Sale added successfully');
-  } catch (error) {
-    console.error('Error adding sale:', error);
-    throw error;
-  }
+export async function addSale(data: {
+  customer_name: string;
+  date: string;
+  traffic_amount: number;
+  duration_months: number;
+  price: number;
+}) {
+  const result = await pool.query(
+    'INSERT INTO sales (customer_name, date, traffic_amount, duration_months, price) VALUES ($1, $2, $3, $4, $5) RETURNING *',
+    [data.customer_name, data.date, data.traffic_amount, data.duration_months, data.price]
+  );
+  return result.rows[0];
 }
 
-export async function removeSale(id: string): Promise<void> {
-  try {
-    await DB.prepare('DELETE FROM sales WHERE id = ?;').bind(id).run();
-  } catch (error) {
-    console.error('Error removing sale:', error);
-    throw error;
-  }
+export async function removeSale(id: number) {
+  await pool.query('DELETE FROM sales WHERE id = $1', [id]);
 }
 
 // Expenses operations
-export async function getExpenses(): Promise<Expense[]> {
-  try {
-    const { results } = await DB.prepare(`
-      SELECT 
-        id,
-        server,
-        date,
-        price
-      FROM expenses 
-      ORDER BY date DESC;
-    `).all();
-    
-    return results.map((row: any) => ({
-      id: row.id,
-      server: row.server,
-      date: row.date,
-      price: row.price
-    }));
-  } catch (error) {
-    console.error('Error fetching expenses:', error);
-    throw error;
-  }
+export async function getExpenses() {
+  const result = await pool.query('SELECT * FROM expenses ORDER BY date DESC');
+  return result.rows;
 }
 
-export async function addExpense(expense: Expense): Promise<void> {
-  try {
-    console.log('Adding expense:', expense);
-    const { id, server, date, price } = expense;
-    await DB.prepare(`
-      INSERT INTO expenses (
-        id,
-        server,
-        date,
-        price
-      ) VALUES (?, ?, ?, ?);
-    `).bind(id, server, date, price).run();
-    console.log('Expense added successfully');
-  } catch (error) {
-    console.error('Error adding expense:', error);
-    throw error;
-  }
+export async function addExpense(data: {
+  server: string;
+  date: string;
+  price: number;
+}) {
+  const result = await pool.query(
+    'INSERT INTO expenses (server, date, price) VALUES ($1, $2, $3) RETURNING *',
+    [data.server, data.date, data.price]
+  );
+  return result.rows[0];
 }
 
-export async function removeExpense(id: string): Promise<void> {
-  try {
-    await DB.prepare('DELETE FROM expenses WHERE id = ?;').bind(id).run();
-  } catch (error) {
-    console.error('Error removing expense:', error);
-    throw error;
-  }
+export async function removeExpense(id: number) {
+  await pool.query('DELETE FROM expenses WHERE id = $1', [id]);
 } 
