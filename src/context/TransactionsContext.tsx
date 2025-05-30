@@ -1,96 +1,103 @@
 'use client';
 
-import * as React from 'react';
-import type { Transaction, SaleFormData, Expense, ExpenseFormData } from '@/lib/types';
-import { getSales, getExpenses, addSale, addExpense, removeSale, removeExpense } from '@/lib/db';
+import React, { createContext, useContext, useState, useEffect } from 'react';
+import type { Transaction, Expense } from '@/lib/types';
+import { getSales, addSale, removeSale, getExpenses, addExpense, removeExpense } from '@/lib/db';
 
 interface TransactionsContextType {
-  transactions: Transaction[];
+  sales: Transaction[];
   expenses: Expense[];
-  addSaleTransaction: (saleData: SaleFormData) => Promise<void>;
-  addExpenseTransaction: (expenseData: ExpenseFormData) => Promise<void>;
-  removeSaleTransaction: (id: string) => Promise<void>;
-  removeExpenseTransaction: (id: string) => Promise<void>;
+  addSale: (sale: Omit<Transaction, 'id' | 'created_at'>) => Promise<void>;
+  removeSale: (id: number) => Promise<void>;
+  addExpense: (expense: Omit<Expense, 'id' | 'created_at'>) => Promise<void>;
+  removeExpense: (id: number) => Promise<void>;
   refreshData: () => Promise<void>;
 }
 
-const TransactionsContext = React.createContext<TransactionsContextType | undefined>(undefined);
+const TransactionsContext = createContext<TransactionsContextType | undefined>(undefined);
 
-export const TransactionsProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  const [transactions, setTransactions] = React.useState<Transaction[]>([]);
-  const [expenses, setExpenses] = React.useState<Expense[]>([]);
+export function TransactionsProvider({ children }: { children: React.ReactNode }) {
+  const [sales, setSales] = useState<Transaction[]>([]);
+  const [expenses, setExpenses] = useState<Expense[]>([]);
 
-  const refreshData = React.useCallback(async () => {
+  const refreshData = async () => {
     try {
       const [salesData, expensesData] = await Promise.all([
         getSales(),
-        getExpenses()
+        getExpenses(),
       ]);
-      setTransactions(salesData);
+      setSales(salesData);
       setExpenses(expensesData);
     } catch (error) {
       console.error('Error refreshing data:', error);
     }
+  };
+
+  useEffect(() => {
+    refreshData();
   }, []);
 
-  // Load data from database on mount
-  React.useEffect(() => {
-    refreshData();
-  }, [refreshData]);
-
-  const addSaleTransaction = async (saleData: SaleFormData) => {
-    const newTransaction: Transaction = {
-      id: `txn_${saleData.customer_name}_${saleData.date.getTime()}`,
-      customer_name: saleData.customer_name,
-      date: saleData.date.toISOString(),
-      trafficAmount: saleData.trafficAmount,
-      durationMonths: saleData.durationMonths,
-      price: Math.round(saleData.price), // Rounded price
-    };
-    await addSale(newTransaction);
-    await refreshData();
+  const handleAddSale = async (sale: Omit<Transaction, 'id' | 'created_at'>) => {
+    try {
+      await addSale(sale);
+      await refreshData();
+    } catch (error) {
+      console.error('Error adding sale:', error);
+      throw error;
+    }
   };
 
-  const addExpenseTransaction = async (expenseData: ExpenseFormData) => {
-    const newExpense: Expense = {
-      id: `exp_${expenseData.server}_${expenseData.date.getTime()}`,
-      server: expenseData.server,
-      date: expenseData.date.toISOString(),
-      price: Math.round(expenseData.price), // Rounded price
-    };
-    await addExpense(newExpense);
-    await refreshData();
+  const handleRemoveSale = async (id: number) => {
+    try {
+      await removeSale(id);
+      await refreshData();
+    } catch (error) {
+      console.error('Error removing sale:', error);
+      throw error;
+    }
   };
 
-  const removeSaleTransaction = async (id: string) => {
-    await removeSale(id);
-    await refreshData();
+  const handleAddExpense = async (expense: Omit<Expense, 'id' | 'created_at'>) => {
+    try {
+      await addExpense(expense);
+      await refreshData();
+    } catch (error) {
+      console.error('Error adding expense:', error);
+      throw error;
+    }
   };
 
-  const removeExpenseTransaction = async (id: string) => {
-    await removeExpense(id);
-    await refreshData();
+  const handleRemoveExpense = async (id: number) => {
+    try {
+      await removeExpense(id);
+      await refreshData();
+    } catch (error) {
+      console.error('Error removing expense:', error);
+      throw error;
+    }
   };
 
   return (
-    <TransactionsContext.Provider value={{ 
-      transactions, 
-      expenses, 
-      addSaleTransaction, 
-      addExpenseTransaction,
-      removeSaleTransaction,
-      removeExpenseTransaction,
-      refreshData
-    }}>
+    <TransactionsContext.Provider
+      value={{
+        sales,
+        expenses,
+        addSale: handleAddSale,
+        removeSale: handleRemoveSale,
+        addExpense: handleAddExpense,
+        removeExpense: handleRemoveExpense,
+        refreshData,
+      }}
+    >
       {children}
     </TransactionsContext.Provider>
   );
-};
+}
 
-export const useTransactions = (): TransactionsContextType => {
-  const context = React.useContext(TransactionsContext);
+export function useTransactions() {
+  const context = useContext(TransactionsContext);
   if (context === undefined) {
     throw new Error('useTransactions must be used within a TransactionsProvider');
   }
   return context;
-};
+}
