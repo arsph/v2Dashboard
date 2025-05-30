@@ -1,3 +1,5 @@
+'use client';
+
 import type {Metadata} from 'next';
 import {Geist, Geist_Mono} from 'next/font/google';
 import './globals.css';
@@ -7,6 +9,7 @@ import { SidebarProvider, SidebarInset } from '@/components/ui/sidebar';
 import { AppSidebar } from '@/components/layout/AppSidebar';
 import { AuthProvider } from '@/context/AuthContext';
 import ProtectedLayout from '@/components/layout/ProtectedLayout';
+import { useEffect } from 'react';
 
 const geistSans = Geist({
   variable: '--font-geist-sans',
@@ -28,36 +31,27 @@ export const metadata: Metadata = {
   },
 };
 
-async function initDatabase() {
-  try {
-    console.log('Layout: Attempting to initialize database...');
-    const baseUrl = process.env.NEXT_PUBLIC_APP_URL || 'http://localhost:3000';
-    const response = await fetch(`${baseUrl}/api/init-db`, {
-      cache: 'no-store',
-      headers: {
-        'Cache-Control': 'no-cache',
-      },
-    });
-    
-    if (!response.ok) {
-      const errorData = await response.json();
-      console.error('Layout: Database initialization failed:', errorData);
-      throw new Error(errorData.details || 'Failed to initialize database');
-    }
-    
-    const data = await response.json();
-    console.log('Layout: Database initialization response:', data);
-  } catch (error) {
-    console.error('Layout: Error during database initialization:', error);
-  }
-}
-
-export default async function RootLayout({
+export default function RootLayout({
   children,
-}: Readonly<{
+}: {
   children: React.ReactNode;
-}>) {
-  await initDatabase();
+}) {
+  useEffect(() => {
+    const initDb = async () => {
+      try {
+        console.log('Layout: Attempting to initialize database...');
+        const response = await fetch('/api/init-db');
+        if (!response.ok) {
+          throw new Error('Failed to initialize database');
+        }
+        console.log('Layout: Database initialized successfully');
+      } catch (error) {
+        console.error('Layout: Error during database initialization:', error);
+      }
+    };
+
+    initDb();
+  }, []);
 
   return (
     <html lang="en" className="dark">
