@@ -1,13 +1,4 @@
 import { sql } from '@vercel/postgres';
-import { Pool } from 'pg';
-
-// Create a new pool using the connection string from environment variables
-const pool = new Pool({
-  connectionString: process.env.POSTGRES_URL,
-  ssl: {
-    rejectUnauthorized: false
-  }
-});
 
 // Sales operations
 export async function getSales() {
