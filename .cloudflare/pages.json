@@ -3,5 +3,6 @@
   "devCommand": "npm run dev",
   "installCommand": "npm install",
   "framework": "nextjs",
-  "buildOutputDirectory": ".next"
+  "buildOutputDirectory": ".next",
+  "nodeVersion": "20.11.1"
 } 
