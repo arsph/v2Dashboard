@@ -2,7 +2,6 @@
 
 import React, { createContext, useContext, useState, useEffect } from 'react';
 import type { Transaction, Expense } from '@/lib/types';
-import { getSales, addSale, removeSale, getExpenses, addExpense, removeExpense } from '@/lib/db';
 
 interface TransactionsContextType {
   sales: Transaction[];
@@ -22,10 +21,17 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const refreshData = async () => {
     try {
-      const [salesData, expensesData] = await Promise.all([
-        getSales(),
-        getExpenses(),
+      const [salesResponse, expensesResponse] = await Promise.all([
+        fetch('/api/sales'),
+        fetch('/api/expenses'),
       ]);
+
+      if (!salesResponse.ok) throw new Error('Failed to fetch sales');
+      if (!expensesResponse.ok) throw new Error('Failed to fetch expenses');
+
+      const salesData: Transaction[] = await salesResponse.json();
+      const expensesData: Expense[] = await expensesResponse.json();
+
       setSales(salesData);
       setExpenses(expensesData);
     } catch (error) {
@@ -39,7 +45,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const handleAddSale = async (sale: Omit<Transaction, 'id' | 'created_at'>) => {
     try {
-      await addSale(sale);
+      const response = await fetch('/api/sales', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(sale),
+      });
+
+      if (!response.ok) throw new Error('Failed to add sale');
+
       await refreshData();
     } catch (error) {
       console.error('Error adding sale:', error);
@@ -49,7 +64,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const handleRemoveSale = async (id: number) => {
     try {
-      await removeSale(id);
+      const response = await fetch('/api/sales', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error('Failed to remove sale');
+
       await refreshData();
     } catch (error) {
       console.error('Error removing sale:', error);
@@ -59,7 +83,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const handleAddExpense = async (expense: Omit<Expense, 'id' | 'created_at'>) => {
     try {
-      await addExpense(expense);
+      const response = await fetch('/api/expenses', {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify(expense),
+      });
+
+      if (!response.ok) throw new Error('Failed to add expense');
+
       await refreshData();
     } catch (error) {
       console.error('Error adding expense:', error);
@@ -69,7 +102,16 @@ export function TransactionsProvider({ children }: { children: React.ReactNode }
 
   const handleRemoveExpense = async (id: number) => {
     try {
-      await removeExpense(id);
+      const response = await fetch('/api/expenses', {
+        method: 'DELETE',
+        headers: {
+          'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ id }),
+      });
+
+      if (!response.ok) throw new Error('Failed to remove expense');
+
       await refreshData();
     } catch (error) {
       console.error('Error removing expense:', error);

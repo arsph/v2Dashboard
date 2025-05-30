@@ -32,7 +32,7 @@ export interface Transaction {
   id: string;
   customer_name: string;
   date: string; // ISO date string
-  trafficAmount: string; // e.g., "Unlimited", "500 GB"
+  traffic_amount: number;
   durationMonths: number;
   price: number;
 }

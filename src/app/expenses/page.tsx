@@ -28,7 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function AllExpensesPage() {
-  const { expenses, removeExpenseTransaction } = useTransactions();
+  const { expenses, removeExpense } = useTransactions();
   const { toast } = useToast();
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [selectedExpenseId, setSelectedExpenseId] = React.useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function AllExpensesPage() {
   const handleConfirmRemove = async () => {
     if (selectedExpenseId) {
       try {
-        await removeExpenseTransaction(selectedExpenseId);
+        await removeExpense(parseInt(selectedExpenseId));
         toast({
           title: 'Expense Removed',
           description: 'The expense transaction has been successfully removed.',

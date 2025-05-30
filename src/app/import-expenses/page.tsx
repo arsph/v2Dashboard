@@ -21,7 +21,7 @@ import { useTransactions } from '@/context/TransactionsContext';
 
 export default function ImportExpensesPage() {
   const { toast } = useToast();
-  const { addExpenseTransaction } = useTransactions();
+  const { addExpense } = useTransactions();
 
   const form = useForm<ExpenseFormData>({
     resolver: zodResolver(ExpenseFormSchema),
@@ -34,7 +34,10 @@ export default function ImportExpensesPage() {
 
   async function onSubmit(data: ExpenseFormData) {
     try {
-      await addExpenseTransaction(data);
+      await addExpense({
+        ...data,
+        date: data.date.toISOString(),
+      });
       toast({
         title: 'Expense Added Successfully!',
         description: `Expense for server ${data.server} on ${format(data.date, "PPP")} has been recorded.`,

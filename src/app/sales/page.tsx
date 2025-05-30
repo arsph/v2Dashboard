@@ -28,7 +28,7 @@ import {
 import { useToast } from '@/hooks/use-toast';
 
 export default function AllSalesPage() {
-  const { transactions, removeSaleTransaction } = useTransactions();
+  const { sales, removeSale } = useTransactions();
   const { toast } = useToast();
   const [isAlertOpen, setIsAlertOpen] = React.useState(false);
   const [selectedTransactionId, setSelectedTransactionId] = React.useState<string | null>(null);
@@ -41,7 +41,7 @@ export default function AllSalesPage() {
   const handleConfirmRemove = async () => {
     if (selectedTransactionId) {
       try {
-        await removeSaleTransaction(selectedTransactionId);
+        await removeSale(parseInt(selectedTransactionId));
         toast({
           title: 'Sale Removed',
           description: 'The sale transaction has been successfully removed.',
@@ -78,7 +78,7 @@ export default function AllSalesPage() {
             <CardDescription>A complete list of all recorded sales.</CardDescription>
           </CardHeader>
           <CardContent>
-            {transactions.length > 0 ? (
+            {sales.length > 0 ? (
               <Table>
                 <TableHeader>
                   <TableRow>
@@ -91,12 +91,12 @@ export default function AllSalesPage() {
                   </TableRow>
                 </TableHeader>
                 <TableBody>
-                  {transactions.map((transaction) => (
+                {sales.map((transaction) => (
                     <TableRow key={transaction.id}>
-                      <TableCell className="font-medium truncate max-w-[150px]">{transaction.user}</TableCell>
+                      <TableCell className="font-medium">{transaction.customer_name}</TableCell>
                       <TableCell>{format(new Date(transaction.date), 'MMM dd, yyyy')}</TableCell>
-                      <TableCell>{transaction.trafficAmount}</TableCell>
-                      <TableCell>{transaction.durationMonths} mo</TableCell>
+                      <TableCell>{transaction.traffic_amount}</TableCell>
+                      <TableCell className="text-right">{transaction.durationMonths}</TableCell>
                       <TableCell className="text-right">{transaction.price} T</TableCell>
                       <TableCell className="text-center">
                         <Button variant="outline" size="icon" onClick={() => handleRemoveClick(transaction.id)}>
@@ -108,7 +108,7 @@ export default function AllSalesPage() {
                 </TableBody>
               </Table>
             ) : (
-              <p className="text-muted-foreground text-center py-4">No sales transactions recorded yet.</p>
+              <p className="text-muted-foreground text-center py-4">No sales recorded yet.</p>
             )}
           </CardContent>
         </Card>

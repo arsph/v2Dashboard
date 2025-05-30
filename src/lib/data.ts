@@ -58,11 +58,11 @@ export const mockDashboardData: DashboardData = {
     ],
   },
   recentTransactions: [
-    { id: "txn_1", user: "user_a@example.com", date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), trafficAmount: "Unlimited", durationMonths: 12, price: 100 },
-    { id: "txn_2", user: "user_b@example.com", date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), trafficAmount: "500 GB", durationMonths: 1, price: 10 },
-    { id: "txn_3", user: "user_c@example.com", date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), trafficAmount: "100 GB", durationMonths: 6, price: 30 },
-    { id: "txn_4", user: "user_d@example.com", date: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(), trafficAmount: "Unlimited", durationMonths: 1, price: 13 },
-    { id: "txn_5", user: "user_e@example.com", date: new Date(new Date().setDate(new Date().getDate() - 4)).toISOString(), trafficAmount: "500 GB", durationMonths: 12, price: 90 },
+    { id: "txn_1", customer_name: "user_a@example.com", date: new Date(new Date().setDate(new Date().getDate() - 1)).toISOString(), traffic_amount: 0, durationMonths: 12, price: 100 },
+    { id: "txn_2", customer_name: "user_b@example.com", date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), traffic_amount: 500, durationMonths: 1, price: 10 },
+    { id: "txn_3", customer_name: "user_c@example.com", date: new Date(new Date().setDate(new Date().getDate() - 2)).toISOString(), traffic_amount: 100, durationMonths: 6, price: 30 },
+    { id: "txn_4", customer_name: "user_d@example.com", date: new Date(new Date().setDate(new Date().getDate() - 3)).toISOString(), traffic_amount: 0, durationMonths: 1, price: 13 },
+    { id: "txn_5", customer_name: "user_e@example.com", date: new Date(new Date().setDate(new Date().getDate() - 4)).toISOString(), traffic_amount: 500, durationMonths: 12, price: 90 },
   ],
   expenses: mockExpenses,
 };

@@ -14,7 +14,7 @@ import { useSidebar } from '@/components/ui/sidebar';
 
 
 export default function DashboardPage() {
-  const { transactions, expenses } = useTransactions();
+  const { sales, expenses } = useTransactions();
   const { toggleSidebar, isMobile } = useSidebar();
   const [monthlyRevenue, setMonthlyRevenue] = React.useState<number>(0);
   const [monthlySalesTrend, setMonthlySalesTrend] = React.useState<TimeSeriesDataPoint[]>([]);
@@ -25,7 +25,7 @@ export default function DashboardPage() {
     const currentMonth = currentDate.getMonth();
     const currentYear = currentDate.getFullYear();
 
-    const currentMonthSales = transactions
+    const currentMonthSales = sales
       .filter(t => {
         const transactionDate = new Date(t.date);
         return transactionDate.getMonth() === currentMonth && transactionDate.getFullYear() === currentYear;
@@ -41,19 +41,21 @@ export default function DashboardPage() {
 
     setMonthlyRevenue(currentMonthSales - currentMonthExpenses);
 
-    const currentMonthGBSold = transactions
+    const currentMonthGBSold = sales
       .filter(t => {
         const transactionDate = new Date(t.date);
         return transactionDate.getMonth() === currentMonth && 
                transactionDate.getFullYear() === currentYear &&
-               t.trafficAmount.toLowerCase() !== 'unlimited';
+               // Assuming 'unlimited' is not a valid number for traffic_amount
+               // If 'unlimited' needs special handling, this logic might need adjustment
+               typeof t.traffic_amount === 'number';
       })
       .reduce((sum, t) => {
-        return sum + parseInt(t.trafficAmount);
+        return sum + t.traffic_amount;
       }, 0);
 
     setMonthlyGBSold(currentMonthGBSold);
-  }, [transactions, expenses]);
+  }, [sales, expenses]);
 
   React.useEffect(() => {
     const formatMonthYear = (date: Date): string => {
@@ -70,7 +72,7 @@ export default function DashboardPage() {
       const targetDate = new Date(now.getFullYear(), now.getMonth() - i, 1);
       const monthYearStr = formatMonthYear(targetDate);
       
-      const salesForMonth = transactions
+      const salesForMonth = sales
         .filter(t => {
           const transactionDate = new Date(t.date);
           return transactionDate.getFullYear() === targetDate.getFullYear() &&
@@ -81,7 +83,7 @@ export default function DashboardPage() {
       salesData.push({ date: monthYearStr, sales: salesForMonth });
     }
     setMonthlySalesTrend(salesData);
-  }, [transactions]);
+  }, [sales]);
 
   const monthlyRevenueMetric: SalesMetric = {
     title: "Monthly Revenue",
@@ -151,7 +153,7 @@ export default function DashboardPage() {
       </div>
 
       <div>
-        <RecentTransactionsTable transactions={transactions.slice(0, 5)} /> 
+        <RecentTransactionsTable transactions={sales.slice(0, 5)} /> 
       </div>
     </div>
   );

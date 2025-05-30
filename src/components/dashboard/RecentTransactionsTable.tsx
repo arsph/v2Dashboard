@@ -35,9 +35,9 @@ export function RecentTransactionsTable({ transactions }: RecentTransactionsTabl
           <TableBody>
             {transactions.map((transaction) => (
               <TableRow key={transaction.id}>
-                <TableCell className="font-medium truncate max-w-[150px]">{transaction.user}</TableCell>
+                <TableCell className="font-medium truncate max-w-[150px]">{transaction.customer_name}</TableCell>
                 <TableCell>{format(new Date(transaction.date), 'MMM dd, yyyy')}</TableCell>
-                <TableCell>{transaction.trafficAmount}</TableCell>
+                <TableCell>{transaction.traffic_amount}</TableCell>
                 <TableCell>{transaction.durationMonths} mo</TableCell>
                 <TableCell className="text-right">{transaction.price} T</TableCell>
               </TableRow>

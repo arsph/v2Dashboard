@@ -20,7 +20,7 @@ import { useTransactions } from '@/context/TransactionsContext';
 
 export default function ImportSalesPage() {
   const { toast } = useToast();
-  const { addSaleTransaction } = useTransactions();
+  const { addSale } = useTransactions();
 
   const form = useForm<SaleFormData>({
     resolver: zodResolver(SaleFormSchema),
@@ -35,7 +35,11 @@ export default function ImportSalesPage() {
 
   async function onSubmit(data: SaleFormData) {
     try {
-      await addSaleTransaction(data);
+      await addSale({
+        ...data,
+        date: data.date.toISOString(),
+        traffic_amount: parseInt(data.trafficAmount),
+      });
       toast({
         title: 'Sale Added Successfully!',
         description: `Sale for ${data.customer_name} has been recorded.`,
