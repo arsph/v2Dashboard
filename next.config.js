@@ -23,8 +23,8 @@ const nextConfig = {
             test: /[\\/]node_modules[\\/]/,
             chunks: 'all',
             name(module) {
-              const packageName = module.context.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/)[1];
-              return `npm.${packageName.replace('@', '')}`;
+              const match = module.context?.match(/[\\/]node_modules[\\/](.*?)([\\/]|$)/);
+              return match ? `npm.${match[1].replace('@', '')}` : 'vendor';
             },
             priority: 30,
           },
@@ -44,9 +44,11 @@ const nextConfig = {
 
     return config;
   },
-  // Disable static optimization for dynamic routes
+  // Configure experimental features
   experimental: {
-    serverActions: true,
+    serverActions: {
+      allowedOrigins: ['localhost:3000', '*.render.com'],
+    },
   },
   // Configure build output
   distDir: '.next',

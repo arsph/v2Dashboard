@@ -11,6 +11,10 @@ services:
         fromDatabase:
           name: v2dashboard-db
           property: connectionString
+      - key: NODE_VERSION
+        value: 20.11.1
+      - key: NEXT_TELEMETRY_DISABLED
+        value: 1
 
 databases:
   - name: v2dashboard-db
